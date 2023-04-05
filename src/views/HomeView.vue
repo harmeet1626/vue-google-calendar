@@ -139,7 +139,6 @@ export default {
       this.tempAttendee = "";
     },
     async create() {
-      
       const event = {
         summary: this.summary,
         location: this.location,
@@ -147,16 +146,14 @@ export default {
         // start: this.start,
         start: {
           dateTime: new Date(this.startDateTime).toISOString(),
-          timeZone: "America/Los_Angeles",
+          timeZone: "Asia/Kolkata",
         },
         end: {
           dateTime: new Date(this.endDateTime).toISOString(),
-          timeZone: "America/Los_Angeles",
+          timeZone: "Asia/Kolkata",
         },
         // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
-        attendees: [
-          ...this.attendees,
-        ],
+        attendees: [...this.attendees],
         reminders: {
           useDefault: false,
           overrides: [
