@@ -2,34 +2,94 @@
   <div class="home">
     <p>Google Calendar API Quickstart</p>
 
-    <button id="authorize_button" @click="handleAuthClick()">Authorize</button>
+    <button
+      class="btn btn-primary"
+      id="authorize_button"
+      @click="handleAuthClick()"
+    >
+      Login</button
+    ><br />
     <button id="signout_button" @click="handleSignoutClick()">Sign Out</button>
-    <button id="event" @click="create()">Create event</button>
     <form @submit.prevent>
-      <input placeholder="summary" v-model="summary" type="text" /><br />
-      <input placeholder="Location" v-model="location" /><br />
-      <input placeholder="description" v-model="description" /><br />
-      <label for="date-input">Choose start date:</label>
-      <input
-        v-model="startDate"
-        type="date"
-        id="date-input"
-        name="date"
-      /><br />
-      <label for="time-input">Choose start time:</label>
-      <!-- <input
-        v-model="startTime"
-        type="time"
-        id="time-input"
-        name="time"
-      /><br />
-      <label for="date-input">Choose end date:</label>
-      <input v-model="endDate" type="date" id="date-input" name="date" /><br />
-      <label for="time-input">Choose end time:</label>
-      <input v-model="endTime" type="time" id="time-input" name="time" /><br /> -->
-      <input v-model="tempAttendee" placeholder="add attendee's email" />
-      <button @click="addAttendee()">add attendee</button>
+      <div class="form-group">
+        <label for="exampleInputEmail1">Summary</label>
+        <input
+          class="form-control"
+          id="exampleInputEmail1"
+          aria-describedby="emailHelp"
+          placeholder="summary"
+          v-model="summary"
+        />
+      </div>
+      <div class="form-group">
+        <label>Location of event</label>
+        <input class="form-control" placeholder="Location" v-model="location" />
+      </div>
+      <div class="form-group">
+        <label>Description of event</label>
+        <input
+          class="form-control"
+          placeholder="description"
+          v-model="description"
+        />
+      </div>
+      <div class="form-group">
+        <label for="exampleInputPassword1">Attendees of event</label>
+        <div style="display: flex">
+          <input
+            class="form-control"
+            placeholder="Attendee's email"
+            v-model="tempAttendee"
+          />
+          <button @click="addAttendee()">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-person-plus-fill"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"
+              />
+              <path
+                fill-rule="evenodd"
+                d="M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z"
+              />
+            </svg>
+          </button>
+        </div>
+        <div v-show="attendees.length !== 0">
+          <p>Invited people are:-</p>
+          <ol v-for="people in attendees" :key="people">
+            {{
+              people.email
+            }}
+          </ol>
+        </div>
+        <div class="form-group">
+          <label>Start event on</label>
+          <input
+            class="form-control"
+            v-model="startDateTime"
+            type="datetime-local"
+            id="datepicker"
+          />
+        </div>
+        <div class="form-group">
+          <label>End event on</label>
+          <input
+            class="form-control"
+            v-model="endDateTime"
+            type="datetime-local"
+            id="datepicker"
+          />
+        </div>
+      </div>
+      <button @click="create()" class="btn btn-primary">Create Event</button>
     </form>
+
     <pre id="content" style="white-space: pre-wrap"></pre>
   </div>
 </template>
@@ -51,22 +111,12 @@ export default {
       // tokenClient: null,
       gapiInited: false,
       gisInited: false,
-      startDate: "",
-      startTime: "",
-      endTime: "",
-      endDate: "",
+      startDateTime: "",
+      endDateTime: "",
       tempAttendee: "",
       summary: "",
       location: "",
       description: "",
-      start: {
-        dateTime: `${this.startDate}+${this.startTime}`,
-        timeZone: "India",
-      },
-      end: {
-        dateTime: `${this.endDate}+${this.endTime}`,
-        timeZone: "India",
-      },
       attendees: [],
       reminders: {
         useDefault: false,
@@ -89,48 +139,23 @@ export default {
       this.tempAttendee = "";
     },
     async create() {
-      // const event = {
-      //   summary: "Tesing",
-      //   location: "Mohali, India",
-      //   description: "A chance to hear more about Google's developer products.",
-      //   start: {
-      //     dateTime: "2023-04-05T09:00:00-07:00",
-      //     timeZone: "America/Los_Angeles",
-      //   },
-      //   end: {
-      //     dateTime: "2023-04-05T17:00:00-07:00",
-      //     timeZone: "America/Los_Angeles",
-      //   },
-      //   // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
-      //   attendees: [
-      //     // { email: "nishant_sisodiya@softprodigy.com" },
-      //     { email: "sbrin@example.com" },
-      //   ],
-      //   reminders: {
-      //     useDefault: false,
-      //     overrides: [
-      //       { method: "email", minutes: 24 * 60 },
-      //       { method: "popup", minutes: 10 },
-      //     ],
-      //   },
-      // };
+      
       const event = {
         summary: this.summary,
         location: this.location,
         description: this.description,
+        // start: this.start,
         start: {
-          dateTime: "2023-04-05T09:00:00-07:00",
+          dateTime: new Date(this.startDateTime).toISOString(),
           timeZone: "America/Los_Angeles",
         },
         end: {
-          dateTime: "2023-04-05T17:00:00-07:00",
+          dateTime: new Date(this.endDateTime).toISOString(),
           timeZone: "America/Los_Angeles",
         },
         // recurrence: ["RRULE:FREQ=DAILY;COUNT=2"],
         attendees: [
           ...this.attendees,
-          // { email: "nishant_sisodiya@softprodigy.com" },
-          // { email: "sbrin@example.com" },
         ],
         reminders: {
           useDefault: false,
@@ -148,6 +173,8 @@ export default {
       request.execute(function (event) {
         // appendPre('Event created: ' + event.htmlLink);
       });
+      this.handleAuthClick();
+      this.attendees = [];
     },
     gapiLoaded() {
       gapi.load("client", this.initializeGapiClient);
